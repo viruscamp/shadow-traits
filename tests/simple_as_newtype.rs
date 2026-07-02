@@ -9,7 +9,9 @@ struct WrapI32Tag;
 impl NamedImplBase for WrapI32Tag {
     type Target = i32;
 }
-type WrapI32 = Wrap<WrapI32Tag>;
+/// I donot want WrapI32 to be a transparent wrapper, 
+/// so Deref is disabled with ImplDeref=false
+type WrapI32 = Wrap<WrapI32Tag, false>;
 
 impl ToString for WrapI32 {
     fn to_string(&self) -> String {
