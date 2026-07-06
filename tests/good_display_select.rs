@@ -1,9 +1,9 @@
 use bytemuck::TransparentWrapper;
-use type_tricks::Wrap;
+use shadow_traits::Wrap;
 
 mod share;
 
-use share::shadow_display_impls::*;
+use share::named_display_impls::*;
 
 /// use Wrap and a named impl directly
 #[test]

@@ -1,10 +1,10 @@
 use bytemuck::TransparentWrapper;
-use type_tricks::Wrap;
+use shadow_traits::Wrap;
 
 mod share;
 
-use share::shadow_to_string::*;
-use share::shadow_to_string_impls::*;
+use share::to_string::*;
+use share::named_to_string_impls::*;
 
 #[test]
 fn test_named_to_string() {

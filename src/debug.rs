@@ -1,26 +1,38 @@
-use crate::{ShadowTrait, is::Is};
+use crate::{ShadowTrait, Is, Wrap, Named};
 
+use bytemuck::TransparentWrapper;
 use core::fmt::{Debug, Formatter, Result};
 use core::marker::PhantomData;
 
-pub trait ShadowDebug: ShadowTrait {
-    fn fmt(this: &Self::Target, f: &mut Formatter<'_>) -> Result;
-}
-
-pub trait ShadowDebugProvider: ShadowTrait
-    where <Self::Impl as ShadowTrait>::Target: Is<Type = Self::Target>
+pub trait DebugProvider: ShadowTrait
+where
+    Self::Impl: ShadowTrait,
+    Self::Target: Is<Type = <Self::Impl as ShadowTrait>::Target>,
+    Named<Self::Impl>: Debug
 {
-    type Impl: ShadowDebug;
+    type Impl;
 }
 
-impl<N: ShadowDebug> ShadowDebugProvider for N {
+impl<N> DebugProvider for N
+where
+    N: ShadowTrait,
+    Named<N>: Debug
+{
     type Impl = Self;
 }
 
-// https://github.com/rust-lang/rust/issues/124449
-impl<NP: ShadowDebugProvider, const ImplDeref: bool> Debug for crate::Wrap<NP, ImplDeref> {
+impl<NP, const ImplDeref: bool> Debug for Wrap<NP, ImplDeref>
+where
+    NP: DebugProvider,
+    NP::Impl: ShadowTrait,
+    NP::Target: Is<Type = <NP::Impl as ShadowTrait>::Target>,
+    Named<NP::Impl>: Debug
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        NP::Impl::fmt(Is::to_ref_left(&self.0), f)
+        let a = &self.0;
+        let b = <NP::Target as Is>::to_ref_right(a);
+        let c: &Named<NP::Impl> = Named::<NP::Impl>::wrap_ref(b);
+        Named::<NP::Impl>::fmt(c, f)
     }
 }
 
@@ -28,8 +40,8 @@ pub struct DefaultDebug<T: Debug + ?Sized>(PhantomData<T>);
 impl<T: Debug + ?Sized> ShadowTrait for DefaultDebug<T> {
     type Target = T;
 }
-impl<T: Debug + ?Sized> ShadowDebug for DefaultDebug<T> {
-    fn fmt(this: &Self::Target, f: &mut Formatter<'_>) -> Result {
-        <T as Debug>::fmt(this, f)
+impl<T: Debug + ?Sized> Debug for Named<DefaultDebug<T>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        <T as Debug>::fmt(&self.0, f)
     }
 }

@@ -1,15 +1,14 @@
 use core::marker::PhantomData;
 use core::fmt::{Debug, Formatter, Result};
 
-use type_tricks::ShadowTrait;
-use type_tricks::debug::ShadowDebug;
+use shadow_traits::{Named, ShadowTrait};
 
 pub struct DebugImpl1;
 impl ShadowTrait for DebugImpl1 {
     type Target = i32;
 }
-impl ShadowDebug for DebugImpl1 {
-    fn fmt(this: &Self::Target, f: &mut Formatter<'_>) -> Result {
+impl Debug for Named<DebugImpl1> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_str("DebugImpl1")
     }
 }
@@ -18,10 +17,10 @@ pub struct DebugImplProxy<T: Debug>(PhantomData<T>);
 impl<T: Debug> ShadowTrait for DebugImplProxy<T> {
     type Target = T;
 }
-impl<T: Debug> ShadowDebug for DebugImplProxy<T> {
-    fn fmt(this: &Self::Target, f: &mut Formatter<'_>) -> Result {
+impl<T: Debug> Debug for Named<DebugImplProxy<T>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_str("Debug Pre ")?;
-        this.fmt(f)?;
+        self.0.fmt(f)?;
         f.write_str(" Post")?;
         Ok(())
     }

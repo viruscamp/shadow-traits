@@ -1,7 +1,7 @@
-use type_tricks::{ShadowTrait, Wrap, debug::ShadowDebugProvider};
+use shadow_traits::{ShadowTrait, Wrap, debug::DebugProvider};
 
 mod share;
-use share::shadow_debug_impls::DebugImplProxy;
+use share::named_debug_impls::DebugImplProxy;
 
 struct WrapI32Tag;
 impl ShadowTrait for WrapI32Tag {
@@ -19,7 +19,7 @@ impl ToString for WrapI32 {
 }
 
 // impl trait by delegation to a named impl
-impl ShadowDebugProvider for WrapI32Tag {
+impl DebugProvider for WrapI32Tag {
     type Impl = DebugImplProxy<i32>;
 }
 

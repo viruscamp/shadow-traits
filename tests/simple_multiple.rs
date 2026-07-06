@@ -1,14 +1,14 @@
 use bytemuck::TransparentWrapper;
-use type_tricks::ShadowTrait;
-use type_tricks::Wrap;
+use shadow_traits::ShadowTrait;
+use shadow_traits::Wrap;
 
 mod share;
 
-use share::shadow_display_impls::*;
-use share::shadow_debug_impls::*;
+use share::named_display_impls::*;
+use share::named_debug_impls::*;
 
-use type_tricks::display::{ShadowDisplayProvider};
-use type_tricks::debug::{ShadowDebugProvider};
+use shadow_traits::display::{DisplayProvider};
+use shadow_traits::debug::{DebugProvider};
 
 pub struct SimpleMultipleTag;
 
@@ -16,11 +16,11 @@ impl ShadowTrait for SimpleMultipleTag {
     type Target = i32;
 }
 
-impl ShadowDisplayProvider for SimpleMultipleTag {
+impl DisplayProvider for SimpleMultipleTag {
     type Impl = DisplayImpl1;
 }
 
-impl ShadowDebugProvider for SimpleMultipleTag {
+impl DebugProvider for SimpleMultipleTag {
     type Impl = DebugImpl1;
 }
 

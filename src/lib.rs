@@ -14,5 +14,6 @@ pub mod is;
 pub mod display;
 pub mod debug;
 
+pub use wrap::Named;
 pub use wrap::Wrap;
 pub use is::Is;

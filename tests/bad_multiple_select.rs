@@ -2,16 +2,15 @@ use core::marker::PhantomData;
 use core::fmt::{Debug, Formatter, Result};
 
 use bytemuck::TransparentWrapper;
-use type_tricks::wrap::Wrap;
-use type_tricks::ShadowTrait;
-use type_tricks::debug::ShadowDebug;
-use type_tricks::is::Is;
+use shadow_traits::wrap::Wrap;
+use shadow_traits::{Named, ShadowTrait};
+use shadow_traits::is::Is;
 
 mod share;
 
-use share::shadow_to_string::*;
-use share::shadow_to_string_impls::*;
-use share::shadow_debug_impls::*;
+use share::to_string::*;
+use share::named_to_string_impls::*;
+use share::named_debug_impls::*;
 
 
 pub struct MultipleImplSelector<T, N1, N2>
@@ -19,9 +18,11 @@ pub struct MultipleImplSelector<T, N1, N2>
 
 impl<T, TS, D> ShadowTrait for MultipleImplSelector<T, TS, D>
 where
-    TS: ShadowToString,
+    TS: ShadowTrait,
+    Named<TS>: ToString,
     TS::Target: Is<Type = T>,
-    D: ShadowDebug,
+    D: ShadowTrait,
+    Named<D>: Debug,
     D::Target: Is<Type = T>,
 {
     type Target = T;
@@ -29,29 +30,35 @@ where
 
 impl<T, TS, D> ToString for Wrap<MultipleImplSelector<T, TS, D>>
 where
-    TS: ShadowToString,
+    TS: ShadowTrait,
+    Named<TS>: ToString,
     TS::Target: Is<Type = T>,
-    D: ShadowDebug,
+    D: ShadowTrait,
+    Named<D>: Debug,
     D::Target: Is<Type = T>,
 {
     fn to_string(&self) -> String {
         let a: &T = &self.0;
-        let b: &TS::Target = Is::to_ref_left(a);
-        TS::to_string(b)
+        let b = <TS::Target as Is>::to_ref_left(a);
+        let c = Named::<TS>::wrap_ref(b);
+        Named::to_string(c)
     }
 }
 
 impl<T, TS, D> Debug for Wrap<MultipleImplSelector<T, TS, D>>
 where
-    TS: ShadowToString,
+    TS: ShadowTrait,
+    Named<TS>: ToString,
     TS::Target: Is<Type = T>,
-    D: ShadowDebug,
+    D: ShadowTrait,
+    Named<D>: Debug,
     D::Target: Is<Type = T>,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let a: &T = &self.0;
-        let b: &D::Target = Is::to_ref_left(a);
-        D::fmt(b, f)
+        let b = <D::Target as Is>::to_ref_left(a);
+        let c = Named::<D>::wrap_ref(b);
+        Named::<D>::fmt(c, f)
     }
 }
 

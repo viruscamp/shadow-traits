@@ -1,48 +1,58 @@
 use core::marker::PhantomData;
+use std::fmt::{Debug,Display};
 
 use bytemuck::TransparentWrapper;
-use type_tricks::ShadowTrait;
-use type_tricks::Wrap;
+use shadow_traits::Named;
+use shadow_traits::ShadowTrait;
+use shadow_traits::Wrap;
 
 mod share;
 
-use share::shadow_display_impls::*;
-use share::shadow_debug_impls::*;
+use share::named_display_impls::*;
+use share::named_debug_impls::*;
 
-use type_tricks::display::DefaultDisplay;
-use type_tricks::display::{ShadowDisplay, ShadowDisplayProvider};
-use type_tricks::debug::{ShadowDebug, ShadowDebugProvider};
-use type_tricks::is::Is;
+use shadow_traits::display::DefaultDisplay;
+use shadow_traits::display::DisplayProvider;
+use shadow_traits::debug::DebugProvider;
+use shadow_traits::is::Is;
 
 pub struct MultipleImplSelector<T, N1, N2>
 (PhantomData<T>, PhantomData<N1>, PhantomData<N2>);
 
 impl<T, N1, N2> ShadowTrait for MultipleImplSelector<T, N1, N2>
 where
-    N1: ShadowDisplay,
+    N1: ShadowTrait,
+    Named<N1>: Display,
     N1::Target: Is<Type = T>,
-    N2: ShadowDebug,
+    N2: ShadowTrait,
+    Named<N2>: Debug,
     N2::Target: Is<Type = T>,
 {
     type Target = T;
 }
 
-impl<'a, T, N1, N2> ShadowDisplayProvider for MultipleImplSelector<T, N1, N2>
+impl<T, N1, N2> DisplayProvider for MultipleImplSelector<T, N1, N2>
 where
-    N1: ShadowDisplay,
+    N1: ShadowTrait,
+    Named<N1>: Display,
     N1::Target: Is<Type = T>,
-    N2: ShadowDebug,
+    T: Is<Type = N1::Target>,
+    N2: ShadowTrait,
+    Named<N2>: Debug,
     N2::Target: Is<Type = T>,
 {
     type Impl = N1;
 }
 
-impl<'a, T, N1, N2> ShadowDebugProvider for MultipleImplSelector<T, N1, N2>
+impl<'a, T, N1, N2> DebugProvider for MultipleImplSelector<T, N1, N2>
 where
-    N1: ShadowDisplay,
+    N1: ShadowTrait,
+    Named<N1>: Display,
     N1::Target: Is<Type = T>,
-    N2: ShadowDebug,
+    N2: ShadowTrait,
+    Named<N2>: Debug,
     N2::Target: Is<Type = T>,
+    T: Is<Type = N2::Target>,
 {
     type Impl = N2;
 }
